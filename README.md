@@ -1,4 +1,5 @@
 # Tic-Tac-Toe game
+## About
 This project is part of Programming Fundamentals assignments.
 
 The main goal was to create a game based on Python with 2 modes:
