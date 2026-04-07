@@ -73,12 +73,12 @@ class Board:
         for row in range(3):
             position = row * 3
             if self.board[position] == self.board[position + 1] == self.board[position + 2] != " ":
-                return self.board[pos]
+                return self.board[position]
 
         # Check columns
         for column in range(3):
             if self.board[column] == self.board[column + 3] == self.board[column + 6] != " ":
-                return self.board[pos]
+                return self.board[column]
 
         """
         Check 2 diagonals:
@@ -96,11 +96,11 @@ class Board:
 
         # From left to right diagonal
         if self.board[0] == self.board[4] == self.board[8] != " ":
-            return self.board[pos]
+            return self.board[0]
 
         # From right to left diagonal
         if self.board[2] == self.board[4] == self.board[6] != " ":
-            return self.board[pos]
+            return self.board[2]
 
         # There is no winner
         return None

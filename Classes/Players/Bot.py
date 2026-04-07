@@ -10,7 +10,6 @@ class Bot(Player):
         is_number_char(char)
 
     Instance variables:
-        __best_symbol
         name
         symbol
     """
@@ -30,7 +29,7 @@ class Bot(Player):
         Parameters:
             :param board:
         """
-        move = self.__best_move(board)
+        move = self.__best_move__(board)
         board.update_board(move, self.symbol)
 
     def __best_move__(self, board):
@@ -66,7 +65,7 @@ class Bot(Player):
 
         return best_move
 
-    def __minimax(self, board, depth, alpha, beta, maximizing_player):
+    def __minimax__(self, board, depth, alpha, beta, maximizing_player):
         """
         Minimax with alpha-beta prunning algorithm function (adapted)
         Source: https://github.com/GeorgeSeif/Tic-Tac-Toe-AI/blob/master/Source.cpp
@@ -97,7 +96,7 @@ class Bot(Player):
 
                     # Check the possible score recursively with own symbol
                     board.board[i] = self.symbol
-                    score = self.__minimax__(board, depth + 1, alpha, beta, False)
+                    eval_score = self.__minimax__(board, depth + 1, alpha, beta, False)
                     board.board[i] = " "
 
                     # Check if score we got is better than previous
@@ -115,7 +114,7 @@ class Bot(Player):
             for i in range(9):
                 if board.check_availability(i):
                     board.board[i] = self.opponent_symbol
-                    eval_score = self.__minimax(board, depth + 1, alpha, beta, True)
+                    eval_score = self.__minimax__(board, depth + 1, alpha, beta, True)
                     board.board[i] = " "
                     min_eval = min(min_eval, eval_score)
                     beta = min(beta, eval_score)
