@@ -74,10 +74,6 @@ class Menu(State):
             
             3. Who move first?
             - It depends on random
-            
-        Additional rules:
-            1. Each player can place either X and O symbols
-            2. If win combination is found - wins who placed the last symbol
 
         Menu:
             1. Human vs Bot
