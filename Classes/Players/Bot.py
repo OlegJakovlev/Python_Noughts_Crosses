@@ -15,11 +15,10 @@ class Bot(Player):
         symbol
     """
 
-    __best_symbol = None
-
     def __init__(self, name=None, symbol=None):
         """ Bot class constructor """
         super().__init__(name, symbol)
+        self.opponent_symbol = "O" if symbol == "X" else "X"
 
     def __str__(self):
         return ("\n" + "{0} move! Please wait...").format(self.name)
@@ -31,8 +30,8 @@ class Bot(Player):
         Parameters:
             :param board:
         """
-
-        board.update_board(self.__best_move__(board), self.__best_symbol)
+        move = self.__best_move(board)
+        board.update_board(move, self.symbol)
 
     def __best_move__(self, board):
         """
@@ -43,9 +42,11 @@ class Bot(Player):
         """
 
         # Set default values which going to be overwritten
-        best_score = -1001
-        best_move = 0
-        alpha, beta = -1000, 1000
+        best_score = -float("inf")
+        best_move = None
+        
+        alpha = -float("inf")
+        beta = float("inf")
 
         # Check which cells are empty
         for i in range(9):
@@ -60,25 +61,12 @@ class Bot(Player):
                 if score > best_score:
                     best_score = score
                     best_move = i
-                    self.__best_symbol = self.symbol
-
-        for i in range(9):
-            if board.check_availability(i):
-
-                # Set each empty board cell and check the possible score and set board value back
-                board.board[i] = "X"
-                score = self.__minimax__(board, 0, alpha, beta, False)
-                board.board[i] = " "
-
-                # High score achieved, save the value and position
-                if score > best_score:
-                    best_score = score
-                    best_move = i
-                    self.__best_symbol = "X"
+                
+                alpha = max(alpha, best_score)
 
         return best_move
 
-    def __minimax__(self, board, depth, alpha, beta, maximize):
+    def __minimax(self, board, depth, alpha, beta, maximizing_player):
         """
         Minimax with alpha-beta prunning algorithm function (adapted)
         Source: https://github.com/GeorgeSeif/Tic-Tac-Toe-AI/blob/master/Source.cpp
@@ -92,16 +80,16 @@ class Bot(Player):
         """
 
         # Check if any board state occurs, if so gives it a score
-        result = board.check_winner()
-        if result:
-            if not maximize:
-                return 1000
-            else:
-                return -1000
+        winner = board.check_winner()
+        if winner == self.symbol:
+            return 10 - depth
+        elif winner == self.opponent_symbol:
+            return depth - 10
+        elif all(not board.check_availability(i) for i in range(9)):
+            return 0
 
-        # If bot move - need to maximize the efficiency of move
-        if maximize:
-            best_score = -1000
+        if maximizing_player:
+            max_eval = -float("inf")
 
             # Check which cells are empty
             for i in range(9):
@@ -113,62 +101,26 @@ class Bot(Player):
                     board.board[i] = " "
 
                     # Check if score we got is better than previous
-                    if score > best_score:
-                        best_score = score - depth * 10
-                        alpha = max(alpha, score)
-                        if beta <= alpha:
-                            break
+                    max_eval = max(max_eval, eval_score)
+                    alpha = max(alpha, eval_score)
+                    
+                    if beta <= alpha:
+                        break
 
-            # Check which cells are empty with different symbol
-            for i in range(9):
-                if board.check_availability(i):
+            return max_eval
 
-                    # Check the possible score recursively with own symbol
-                    board.board[i] = "X"
-                    score = self.__minimax__(board, depth + 1, alpha, beta, False)
-                    board.board[i] = " "
-
-                    # Check if score we got is better than previous
-                    if score > best_score:
-                        best_score = score - depth * 10
-                        alpha = max(alpha, score)
-                        if beta <= alpha:
-                            break
-
-            return best_score
-
-        # Predict how player will make a move in best scenario
         else:
-            best_score = 1000
+            min_eval = float("inf")
 
-            # Check which cells are empty
             for i in range(9):
                 if board.check_availability(i):
-
-                    # Check the possible score recursively
-                    board.board[i] = "X"
-                    score = self.__minimax__(board, depth + 1, alpha, beta, True)
+                    board.board[i] = self.opponent_symbol
+                    eval_score = self.__minimax(board, depth + 1, alpha, beta, True)
                     board.board[i] = " "
+                    min_eval = min(min_eval, eval_score)
+                    beta = min(beta, eval_score)
+                    
+                    if beta <= alpha:
+                        break
 
-                    if score < best_score:
-                        best_score = score + depth * 10
-                        beta = min(score, best_score)
-                        if beta <= alpha:
-                            break
-
-            # Check which cells are empty with different symbol
-            for i in range(9):
-                if board.check_availability(i):
-
-                    # Check the possible score recursively
-                    board.board[i] = self.symbol
-                    score = self.__minimax__(board, depth + 1, alpha, beta, True)
-                    board.board[i] = " "
-
-                    if score < best_score:
-                        best_score = score + depth * 10
-                        beta = min(score, best_score)
-                        if beta <= alpha:
-                            break
-
-            return best_score
+            return min_eval
